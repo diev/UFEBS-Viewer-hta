@@ -9,6 +9,7 @@
 	innerBorder=no
 	contextMenu=no
 	version=1.0.0
+	author=mozers™, mozers@mail.ru, icq#256106175
 >
 <style type="text/css">
 	*             {margin:4px; cursor:default;} /*общие определения*/
@@ -159,7 +160,7 @@ function OnKeyDown(){
 			msg_text = "Выберите папку для сохранения файла " + file;
 			folder_path = DialogBrowseForFolder(msg_text);
 			if (folder_path) Save(folder_path + file, text);
-			event.returnValue = false;
+			event.returnValue = false; // отключаем перезагрузку страницы по F5
 			break;
 		case 117: // F6
 			file = fileName + '.xml';
