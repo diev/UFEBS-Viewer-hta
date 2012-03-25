@@ -1,0 +1,305 @@
+<html>
+<head>
+<meta http-equiv=content-type content="text-html; charset=utf-8">
+<meta http-equiv=MSThemeCompatible content=yes>
+<hta:application
+	id=idUFEBS_Viewer
+	applicationName=UFEBS_Viewer
+	icon=msxml3.dll
+	innerBorder=no
+	contextMenu=no
+	version=1.0.0
+>
+<style type="text/css">
+	*             {margin:4px; cursor:default;} /*общие определения*/
+	table.help    {position:relative; top:-8px; left:-8px; background-color:#FFFFCC; border:1px solid #999900;}                              /*подсказка*/
+	div.help      {position:absolute; top:40px; left:expression(document.body.offsetWidth-idHelp.offsetWidth-40); background-color:#C0C0C0;} /*подсказка тень*/
+	.help td.key  {font:normal 8pt Arial Black; color:#993300;}                                                                              /*подсказка клавиши*/
+	.help td.text {font:8pt MS Shell Dlg; white-space:nowrap;}                                                                               /*подсказка текст*/
+	#idPRE        {font:normal 12px Courier New;}  /*текст документа УФЭБС*/
+</style>
+<style type="text/css" media="print">
+	.help {display:none;}
+</style>
+<script type="text/javascript">
+var filePathNameExt = ''; // путь\имя.расширение текущего файла
+var fileNameExt = '';     // имя.расширение текущего файла
+var fileName = '';        // имя текущего файла
+var fileExt = '';         // расширение текущего файла
+var oXML;                 // объект, хранящий содержимое текущего XML файла
+var text = '';            // текст преобразованного файла
+var msxml_version = '';   // версия Microsoft Core XML Services (MSXML)
+var ED, reportID;         // атрибуты УФЭБС документа
+var INI = {};             // объект, хранящий в виде параметров все ключи ini-файла
+var script_path = unescape(document.URL).replace(/^file:\/\/(.+?)[^\\]+$/, '$1'); // путь к данному скрипту
+
+// Чтение ini-файла в объект INI
+ReadINIFile(script_path + "\\UFEBS_Viewer.ini");
+
+// Чтение ini файла в объект INI со свойствами идентичными именам ключей
+function ReadINIFile(ini_file) {
+	var FSO = new ActiveXObject("Scripting.FileSystemObject");
+	if ((FSO.FileExists(ini_file)) && (FSO.GetFile(ini_file).Size > 0)) {
+		with (FSO.OpenTextFile(ini_file)) {
+			var text = ReadAll();
+			Close();
+			var arr_lines = text.split('\n');
+			var section, param, value;
+			for (var i in arr_lines){
+				if (/^\[(\w+)\]/.test(arr_lines[i])){
+					section = RegExp.$1;
+					if (!INI[section]) INI[section] = {};
+				}
+				if (/^([^;#][^=]*?)\s*=\s*([^\r\n]*?)\s*$/.test(arr_lines[i])){
+					param = RegExp.$1;
+					value = RegExp.$2;
+					INI[section][param] = value;
+				}
+			}
+		}
+	}
+	return INI;
+}
+
+// Инициализируем самую последнюю доступную версию Microsoft Core XML Services (MSXML)
+function MSXML_Init() {
+	var vers = ['4.0', '5.0', '6.0'];
+	for (var i = 0; i < vers.length; i++) {
+		try {
+			var msxml = new ActiveXObject('Msxml2.DOMDocument.'+vers[i]);
+			msxml_version = vers[i];
+			return msxml;
+		}
+		catch (e) {}
+	}
+	alert("Продолжение работы невозможно!\nУстановите MSXML 4.0 или более поздней версии.");
+	window.open("http://www.microsoft.com/downloads/ru-ru/details.aspx?FamilyID=d21c292c-368b-4ce1-9dab-3e9827b70604");
+	self.close();
+}
+
+// Связывание программы с xml файлами
+function SetFileAssociation(){
+	var WshShell = new ActiveXObject("WScript.Shell");
+	var xml_viever_cmd = 'mshta.exe "' + unescape(document.URL).replace(/^file:\/\/(.+)$/, '$1') + '" "%1"';
+	var fclass = '';
+	var cmd = '';
+	try {
+		fclass = WshShell.RegRead('HKCR\\.'+fileExt+'\\');
+		cmd = WshShell.RegRead('HKCR\\'+fclass+'\\shell\\UFEBS_Viewer\\command\\');
+	} catch(e) {}
+	if (cmd != xml_viever_cmd) {
+		if (WshShell.Popup('Добавить в контестное меню '+fileExt.toUpperCase()+' файлов пункт "UFEBS Viewer"?', 0, "Установка ассоциаций", 36) == 6) {
+			if (fclass) {
+				WshShell.RegWrite('HKCR\\'+fclass+'\\shell\\UFEBS_Viewer\\command\\', xml_viever_cmd);
+			} else {
+				WshShell.RegWrite('HKCR\\.'+fileExt+'\\', 'UFEBSfile');
+				WshShell.RegWrite('HKCR\\UFEBSfile\\', 'Файл УФЭБС');
+				WshShell.RegWrite('HKCR\\UFEBSfile\\DefaultIcon\\', 'msxml3.dll,0');
+				WshShell.RegWrite('HKCR\\UFEBSfile\\shell\\UFEBS_Viewer\\command\\', xml_viever_cmd);
+			}
+		}
+	}
+}
+
+// Разбор полного имени файла по составляющим
+function GetFileName(){
+	var FSO = new ActiveXObject("Scripting.FileSystemObject");
+	var file = FSO.GetFile(filePathNameExt);
+	fileNameExt = file.Name;
+	fileExt = fileNameExt.replace(/^.*\./, '');
+	fileName = fileNameExt.replace(/\..*?$/, '');
+}
+
+// Диалог выбора имени файла
+// Присваивает глобальной переменной filePathNameExt полный путь к выбранному файлу.
+function DialogOpenFile() {
+	var dialog = '<object id="HtmlDlgHelper" width=0 height=0 classid="clsid:3050F4E1-98B5-11CF-BB82-00AA00BDCE0B"></object>';
+	document.body.insertAdjacentHTML('beforeEnd', dialog);
+	var fname = HtmlDlgHelper.OpenFileDlg("","","XML-документы (*.xml)|*.xml|Все файлы (*.*)|*.*|", "Открытие документа УФЭБС");
+	HtmlDlgHelper.outerHTML = '';
+	if (!fname) self.close(); // при отказе от выбора закрываем приложение
+	return fname;
+}
+
+// Диалог выбора папки для сохранения файла
+function DialogBrowseForFolder(msg_text) {
+	with (new ActiveXObject("Shell.Application")){
+		var objFolder = BrowseForFolder(0, msg_text, 0);
+	}
+	if (objFolder) return objFolder.Self.Path + '\\';
+}
+
+// Cохранение файла
+function Save(out_fname, out_text){
+	var FSO = new ActiveXObject("Scripting.FileSystemObject");
+	with (FSO.OpenTextFile(out_fname, 2, true)) {
+		Write(out_text);
+		Close();
+	}
+}
+
+// Обработка нажатий на клавиши
+function OnKeyDown(){
+	var folder_path, file, msg_text;
+	switch(event.keyCode){
+		case 27: // Esc
+			self.close();
+			break;
+		case 112: // F1
+			idHelp.style.display = "";
+			setTimeout('idHelp.style.display="none"', 4000); // через 4 секунды скрываем подсказку
+			break;
+		case 113: // F2
+			filePathNameExt = DialogOpenFile();
+			GetFileName();
+			LoadXMLFile();
+			break;
+		case 116: // F5
+			file = fileName + '.txt';
+			msg_text = "Выберите папку для сохранения файла " + file;
+			folder_path = DialogBrowseForFolder(msg_text);
+			if (folder_path) Save(folder_path + file, text);
+			event.returnValue = false;
+			break;
+		case 117: // F6
+			file = fileName + '.xml';
+			msg_text = "Выберите папку для сохранения файла " + file;
+			folder_path = DialogBrowseForFolder(msg_text);
+			if (folder_path) oXML.save(folder_path + file);
+			break;
+		case 118: // F7
+			Print();
+			break;
+		case 121: // F10
+			SetFileAssociation();
+			break;
+	}
+}
+
+// Печать документа
+function Print(auto){
+	// устанавливаем дополнительные параметры стиля печати в зависимости от типа документа
+	var add_style = 'font:bold ';
+	switch(ED){
+		case 'ED219':
+			switch(reportID){
+					case '0401301': // ответ на ED218 (запрос выходной формы)
+						add_style += '9px;'
+						break;
+					case '0401318': // ежемесячный счет за услуги РЦИ
+						add_style += '8px; writing-mode:tb-rl;'
+						break;
+					default:
+						add_style += '12px;'
+			}
+			break;
+		case 'ED243':
+			add_style += '14px;'
+			break;
+		case 'ED211':
+			add_style += '9px;'
+			break;
+		default:
+			add_style += '12px;'
+	}
+	document.styleSheets[1].addRule('#idPRE', add_style);
+
+	if (auto) setTimeout(function(){with (new ActiveXObject("WScript.Shell")){SendKeys("{ENTER}")}}, 10000);
+	window.print();
+}
+
+// Загрузка XML документа
+function LoadXMLFile(){
+	oXML = MSXML_Init();
+	oXML.async = false;
+	oXML.load (filePathNameExt);
+	var err = oXML.parseError;
+	if (err.errorCode) {
+		alert("Ошибка в XML документе!");
+	} else {
+		var obj64 = oXML.getElementsByTagName("sen:Object")[0];
+		if (obj64) {
+			with (oXML.createElement("tmp")) {
+				dataType = "bin.base64";
+				text = obj64.text;
+				oXML.load(nodeTypedValue);
+			}
+		}
+
+		with (oXML.documentElement) {
+			ED = nodeName;
+			reportID = getAttribute("ReportID");
+		}
+		document.title = (obj64 ? '[base64 :: ' : '[') + ED + ' :: ' + fileNameExt + ' :: MSXML ' + msxml_version + '] - ' + idUFEBS_Viewer.applicationName.replace(/_/g,' ') + ' v.' + idUFEBS_Viewer.version;
+
+		var oXSLT = MSXML_Init();
+		oXSLT.async = false;
+		oXSLT.load ("forms.xslt");
+		with (oXML.documentElement) {
+			if (INI.Info.BIC) setAttribute('InfoBIC', INI.Info.BIC);
+			if (INI.Info.RKC) setAttribute('InfoRKC', INI.Info.RKC);
+			if (INI.Info.BANK) setAttribute('InfoBANK', INI.Info.BANK);
+		}
+		text = oXML.transformNode(oXSLT);
+		idPRE.innerText = text;
+		with (oXML.documentElement) {
+			removeAttribute('InfoBIC');
+			removeAttribute('InfoRKC');
+			removeAttribute('InfoBANK');
+		}
+	}
+}
+
+// Действия при старте программы
+function on_load(){
+	// Проверка наличия в массиве ком.строки указанного ключа key
+	function IsKey (arr, key){
+		for(var i = 1, arg; arg = arr[i++];) {
+			if (arg.toLowerCase() == key) return arr[i] ? arr[i] : true;
+		}
+	}
+	// парсинг командной строки
+	var cmdline = idUFEBS_Viewer.commandLine;
+	var arr_cmd = cmdline.match(/[^" ]+|"[^"]+?"/g);
+	var fname = arr_cmd[1] ? arr_cmd[1].replace(/"/g, '') : '';
+
+	var isPrint = IsKey(arr_cmd, '/print');
+	var isSaveText =  IsKey(arr_cmd, '/savetext');
+	var isSaveXML =  IsKey(arr_cmd, '/savexml');
+	var isHelp =  IsKey(arr_cmd, '/help') || IsKey(arr_cmd, '/?');
+	if (isHelp) {
+		var WshShell = new ActiveXObject("WScript.Shell");
+		var msg = 'Ключи командной строки:\n';
+			msg += '/print\t\t- печать файла\n  /savetext DIR\t- сохранить как текст в папке DIR\n  /savexml DIR\t- сохранить как xml в папке DIR\n  /help или /?\t- эта подсказка';
+		WshShell.Popup(msg, 0, "UFEBS Viewer", 64);
+		self.close();
+	}
+
+	filePathNameExt = fname ? fname : DialogOpenFile();
+	GetFileName();
+
+	document.title = idUFEBS_Viewer.applicationName.replace(/_/g,' ') + ' v.' + idUFEBS_Viewer.version;
+	LoadXMLFile(isSaveXML); // загрузка XML документа
+	setTimeout('idHelp.style.display="none"', 2000); // через 2 секунды скрываем подсказку
+	if (typeof(isSaveXML)=='string') oXML.save(isSaveXML + '\\' + fileName + '.xml');
+	if (typeof(isSaveText)=='string') Save(isSaveText + '\\' + fileName + '.txt', text);
+
+	if (isPrint) Print(true);
+}
+</script>
+</head>
+<body onload="on_load()" onkeydown="OnKeyDown();">
+	<pre id="idPRE"></pre>
+	<div id="idHelp" class="help">
+		<table class="help">
+			<tr><td class="key">&nbsp;Esc<td class="text">&nbsp;Выход из программы
+			<tr><td class="key">&nbsp;F1<td class="text">&nbsp;Эта подсказка
+			<tr><td class="key">&nbsp;F2<td class="text">&nbsp;Открыть файл
+			<tr><td class="key">&nbsp;F5<td class="text">&nbsp;Сохранить в TXT файл&nbsp;
+			<tr><td class="key">&nbsp;F6<td class="text">&nbsp;Сохранить в XML файл&nbsp;
+			<tr><td class="key">&nbsp;F7<td class="text">&nbsp;Печать&nbsp;
+			<tr><td class="key">&nbsp;F10<td class="text">&nbsp;Ассоциировать программу с файлом&nbsp;
+		</table>
+	</div>
+</body>
+</html>
