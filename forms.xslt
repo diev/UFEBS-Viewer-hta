@@ -1540,7 +1540,7 @@ xmlns:xf="http://www.w3.org/2002/08/xquery-functions">
 	<xsl:text>ЗАПРОС НА ПОЛУЧЕНИЕ ИНФОРМАЦИИ ПО ЭПД УЧАСТНИКА /ED243/ </xsl:text>
 	<xsl:call-template name="PriznGr"/>
 
-	<xsl:text>Код запроса : </xsl:text><xsl:value-of select="@EDDefineRequestCode"/>
+	<xsl:text> Код запроса : </xsl:text><xsl:value-of select="@EDDefineRequestCode"/>
 	<xsl:if test="@EDDefineRequestCode = 01">
 	<xsl:text> (Уточните номер банковского (лицевого) счета получателя)</xsl:text>
 	</xsl:if>
@@ -1567,100 +1567,105 @@ xmlns:xf="http://www.w3.org/2002/08/xquery-functions">
 	</xsl:if>
 	<xsl:text>&#13;&#10;</xsl:text>
 
-	<xsl:text>Идентификаторы исходного ЭПД : </xsl:text>
+	<xsl:text> &#13;&#10;Идентификаторы исходного ЭПД</xsl:text>
 	<xsl:text>&#13;&#10;</xsl:text>
-	<xsl:text>№ </xsl:text><xsl:value-of select="ed:OriginalEPD/@EDNo"/>
+	<xsl:text>----------------------------</xsl:text>
+	<xsl:text>&#13;&#10;</xsl:text>
+	<xsl:text> № </xsl:text><xsl:value-of select="ed:OriginalEPD/@EDNo"/>
 	<xsl:text> от </xsl:text>
 	<xsl:for-each select="ed:OriginalEPD/@EDDate"><xsl:call-template name="date"/></xsl:for-each>
+	<xsl:text>&#13;&#10;</xsl:text>
 	<xsl:text> УИС : </xsl:text><xsl:value-of select="ed:OriginalEPD/@EDAuthor"/>
-	<xsl:text>&#13;&#10;&#10;</xsl:text>
+	<xsl:text>&#13;&#10;</xsl:text>
+	<xsl:if test="ed:EDDefineRequestInfo/@*">
+		<xsl:text> &#13;&#10;Реквизиты ЭПД, поясняющие запрос</xsl:text>
+		<xsl:text>&#13;&#10;</xsl:text>
+		<xsl:text>--------------------------------</xsl:text>
+		<xsl:text>&#13;&#10;</xsl:text>
+		<xsl:if test="ed:EDDefineRequestInfo/@AccDocNo != ''">
+		<xsl:text> Номер расчетного документа              : </xsl:text>
+		<xsl:value-of select="ed:EDDefineRequestInfo/@AccDocNo"/>
+		<xsl:text>&#13;&#10;</xsl:text>
+		</xsl:if>
 
-	<xsl:text>Реквизиты ЭПД, поясняющие запрос </xsl:text>
-	<xsl:text>&#13;&#10;</xsl:text>
-	<xsl:text>-------------------------------------</xsl:text>
-	<xsl:text>&#13;&#10;</xsl:text>
-	<xsl:if test="ed:EDDefineRequestInfo/@AccDocNo != ''">
-	<xsl:text>Номер расчетного документа              : </xsl:text>
-	<xsl:value-of select="ed:EDDefineRequestInfo/@AccDocNo"/>
-	<xsl:text>&#13;&#10;</xsl:text>
-	</xsl:if>
+		<xsl:if test="ed:EDDefineRequestInfo/@AccDocDate != ''">
+		<xsl:text> Дата выписки расчетного документа       : </xsl:text>
+		<xsl:for-each select="ed:EDDefineRequestInfo/@AccDocDate"><xsl:call-template name="date"/></xsl:for-each>
+		<xsl:text>&#13;&#10;</xsl:text>
+		</xsl:if>
+		<xsl:if test="ed:EDDefineRequestInfo/@Acc != ''">
+		<xsl:text> Номер счета плательщика или получателя  : </xsl:text>
+		<xsl:value-of select="ed:EDDefineRequestInfo/@Acc"/>
+		<xsl:text>&#13;&#10;</xsl:text>
+		</xsl:if>
 
-	<xsl:if test="ed:EDDefineRequestInfo/@AccDocDate != ''">
-	<xsl:text>Дата выписки расчетного документа       : </xsl:text>
-	<xsl:for-each select="ed:EDDefineRequestInfo/@AccDocDate"><xsl:call-template name="date"/></xsl:for-each>
-	<xsl:text>&#13;&#10;</xsl:text>
-	</xsl:if>
-	<xsl:if test="ed:EDDefineRequestInfo/@Acc != ''">
-	<xsl:text>Номер счета плательщика или получателя  : </xsl:text>
-	<xsl:value-of select="ed:EDDefineRequestInfo/@Acc"/>
-	<xsl:text>&#13;&#10;</xsl:text>
-	</xsl:if>
-
-	<xsl:if test="ed:EDDefineRequestInfo/@Sum != ''">
-	<xsl:text>Сумма     : </xsl:text>
-	<xsl:for-each select="ed:EDDefineRequestInfo/@Sum"><xsl:call-template name="sum"/></xsl:for-each>
-	<xsl:text>&#13;&#10;</xsl:text>
-	</xsl:if>
-	<xsl:if test="ed:EDDefineRequestInfo/ed:Name != ''">
-	<xsl:text>Наименование плательщика или получателя : </xsl:text><xsl:value-of select="ed:EDDefineRequestInfo/ed:Name"/>
-	<xsl:text>&#13;&#10;</xsl:text>
-	</xsl:if>
-	<xsl:text>&#13;&#10;</xsl:text>
-
-	<xsl:text>Запрашиваемые поля  </xsl:text>
-	<xsl:text>&#13;&#10;</xsl:text>
-	<xsl:text>-------------------------------------</xsl:text>
-	<xsl:text>&#13;&#10;</xsl:text>
-	<xsl:if test="ed:EDDefineRequestInfo/ed:FieldQueryMask/@Field60 = '1'">
-	<xsl:text>ИНН плательщика </xsl:text>
-	<xsl:text>&#13;&#10;</xsl:text>
-	</xsl:if>
-	<xsl:if test="ed:EDDefineRequestInfo/ed:FieldQueryMask/@Field61 = '1'">
-	<xsl:text>ИНН получателя </xsl:text>
-	<xsl:text>&#13;&#10;</xsl:text>
-	</xsl:if>
-	<xsl:if test="ed:EDDefineRequestInfo/ed:FieldQueryMask/@Field101 = '1'">
-	<xsl:text>Статус составителя </xsl:text>
-	<xsl:text>&#13;&#10;</xsl:text>
-	</xsl:if>
-	<xsl:if test="ed:EDDefineRequestInfo/ed:FieldQueryMask/@Field102 = '1'">
-	<xsl:text>КПП плательщика </xsl:text>
-	<xsl:text>&#13;&#10;</xsl:text>
-	</xsl:if>
-	<xsl:if test="ed:EDDefineRequestInfo/ed:FieldQueryMask/@Field103 = '1'">
-	<xsl:text>КПП получателя </xsl:text>
-	<xsl:text>&#13;&#10;</xsl:text>
-	</xsl:if>
-	<xsl:if test="ed:EDDefineRequestInfo/ed:FieldQueryMask/@Field104 = '1'">
-	<xsl:text>Код бюджетной классификации </xsl:text>
-	<xsl:text>&#13;&#10;</xsl:text>
-	</xsl:if>
-	<xsl:if test="ed:EDDefineRequestInfo/ed:FieldQueryMask/@Field105 = '1'">
-	<xsl:text>Код муниципального образования ОКАТО </xsl:text>
-	<xsl:text>&#13;&#10;</xsl:text>
-	</xsl:if>
-	<xsl:if test="ed:EDDefineRequestInfo/ed:FieldQueryMask/@Field106 = '1'">
-	<xsl:text>Основание налогового платежа </xsl:text>
-	<xsl:text>&#13;&#10;</xsl:text>
-	</xsl:if>
-	<xsl:if test="ed:EDDefineRequestInfo/ed:FieldQueryMask/@Field107 = '1'">
-	<xsl:text>Налоговый период </xsl:text>
-	<xsl:text>&#13;&#10;</xsl:text>
-	</xsl:if>
-	<xsl:if test="ed:EDDefineRequestInfo/ed:FieldQueryMask/@Field108 = '1'">
-	<xsl:text>Номер налогового документа </xsl:text>
-	<xsl:text>&#13;&#10;</xsl:text>
-	</xsl:if>
-	<xsl:if test="ed:EDDefineRequestInfo/ed:FieldQueryMask/@Field109 = '1'">
-	<xsl:text>Дата налогового документа </xsl:text>
-	<xsl:text>&#13;&#10;</xsl:text>
-	</xsl:if>
-	<xsl:if test="ed:EDDefineRequestInfo/ed:FieldQueryMask/@Field110 = '1'">
-	<xsl:text>Вид платежа для налога </xsl:text>
-	<xsl:text>&#13;&#10;</xsl:text>
+		<xsl:if test="ed:EDDefineRequestInfo/@Sum != ''">
+		<xsl:text> Сумма                        </xsl:text>
+		<xsl:for-each select="ed:EDDefineRequestInfo/@Sum"><xsl:call-template name="sum"/></xsl:for-each>
+		<xsl:text>&#13;&#10;</xsl:text>
+		</xsl:if>
+		<xsl:if test="ed:EDDefineRequestInfo/ed:Name != ''">
+		<xsl:text> Наименование плательщика или получателя : </xsl:text><xsl:value-of select="ed:EDDefineRequestInfo/ed:Name"/>
+		<xsl:text>&#13;&#10;</xsl:text>
+		</xsl:if>
+		<xsl:text>&#13;&#10;</xsl:text>
 	</xsl:if>
 
-	<xsl:text>&#13;&#10;</xsl:text>
+	<xsl:if test="@EDDefineRequestCode = 08">
+		<xsl:text>Запрашиваемые поля</xsl:text>
+		<xsl:text>&#13;&#10;</xsl:text>
+		<xsl:text>------------------</xsl:text>
+		<xsl:text>&#13;&#10;</xsl:text>
+		<xsl:if test="ed:EDDefineRequestInfo/ed:FieldQueryMask/@Field60 = '1'">
+		<xsl:text> ИНН плательщика </xsl:text>
+		<xsl:text>&#13;&#10;</xsl:text>
+		</xsl:if>
+		<xsl:if test="ed:EDDefineRequestInfo/ed:FieldQueryMask/@Field61 = '1'">
+		<xsl:text> ИНН получателя </xsl:text>
+		<xsl:text>&#13;&#10;</xsl:text>
+		</xsl:if>
+		<xsl:if test="ed:EDDefineRequestInfo/ed:FieldQueryMask/@Field101 = '1'">
+		<xsl:text> Статус составителя </xsl:text>
+		<xsl:text>&#13;&#10;</xsl:text>
+		</xsl:if>
+		<xsl:if test="ed:EDDefineRequestInfo/ed:FieldQueryMask/@Field102 = '1'">
+		<xsl:text> КПП плательщика </xsl:text>
+		<xsl:text>&#13;&#10;</xsl:text>
+		</xsl:if>
+		<xsl:if test="ed:EDDefineRequestInfo/ed:FieldQueryMask/@Field103 = '1'">
+		<xsl:text> КПП получателя </xsl:text>
+		<xsl:text>&#13;&#10;</xsl:text>
+		</xsl:if>
+		<xsl:if test="ed:EDDefineRequestInfo/ed:FieldQueryMask/@Field104 = '1'">
+		<xsl:text> Код бюджетной классификации </xsl:text>
+		<xsl:text>&#13;&#10;</xsl:text>
+		</xsl:if>
+		<xsl:if test="ed:EDDefineRequestInfo/ed:FieldQueryMask/@Field105 = '1'">
+		<xsl:text> Код муниципального образования ОКАТО </xsl:text>
+		<xsl:text>&#13;&#10;</xsl:text>
+		</xsl:if>
+		<xsl:if test="ed:EDDefineRequestInfo/ed:FieldQueryMask/@Field106 = '1'">
+		<xsl:text> Основание налогового платежа </xsl:text>
+		<xsl:text>&#13;&#10;</xsl:text>
+		</xsl:if>
+		<xsl:if test="ed:EDDefineRequestInfo/ed:FieldQueryMask/@Field107 = '1'">
+		<xsl:text> Налоговый период </xsl:text>
+		<xsl:text>&#13;&#10;</xsl:text>
+		</xsl:if>
+		<xsl:if test="ed:EDDefineRequestInfo/ed:FieldQueryMask/@Field108 = '1'">
+		<xsl:text> Номер налогового документа </xsl:text>
+		<xsl:text>&#13;&#10;</xsl:text>
+		</xsl:if>
+		<xsl:if test="ed:EDDefineRequestInfo/ed:FieldQueryMask/@Field109 = '1'">
+		<xsl:text> Дата налогового документа </xsl:text>
+		<xsl:text>&#13;&#10;</xsl:text>
+		</xsl:if>
+		<xsl:if test="ed:EDDefineRequestInfo/ed:FieldQueryMask/@Field110 = '1'">
+		<xsl:text> Вид платежа для налога </xsl:text>
+		<xsl:text>&#13;&#10;</xsl:text>
+		</xsl:if>
+		<xsl:text>&#13;&#10;</xsl:text>
+	</xsl:if>
 </xsl:template>
 
 <!--  ED244  -->
