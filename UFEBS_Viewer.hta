@@ -8,7 +8,7 @@
 	icon=msxml3.dll
 	innerBorder=no
 	contextMenu=no
-	version=1.2.0
+	version=1.2.1
 	author=mozers™, mozers@mail.ru, icq#256106175
 >
 <style type="text/css">
@@ -235,6 +235,12 @@ function LoadXMLFile(){
 			}
 		}
 
+		if (!oXML.documentElement) {
+			var WshShell = new ActiveXObject("WScript.Shell");
+			var msg = fileNameExt + '\nне является корректным файлом УФЭБС!\n(возможно файл зашифрован)';
+			WshShell.Popup(msg, 0, "UFEBS Viewer", 48);
+			self.close();
+		}
 		with (oXML.documentElement) {
 			ED = nodeName;
 			reportID = getAttribute("ReportID");
