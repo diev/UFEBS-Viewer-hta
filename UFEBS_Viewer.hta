@@ -8,7 +8,7 @@
 	icon=msxml3.dll
 	innerBorder=no
 	contextMenu=no
-	version=1.0.1
+	version=1.1.0
 	author=mozers™, mozers@mail.ru, icq#256106175
 >
 <style type="text/css">
@@ -205,7 +205,7 @@ function Print(auto){
 	}
 	document.styleSheets[1].addRule('#idPRE', add_style);
 
-	if (auto) setTimeout(function(){with (new ActiveXObject("WScript.Shell")){SendKeys("{ENTER}")}}, 10000);
+	if (auto) setTimeout('with(new ActiveXObject("WScript.Shell")){SendKeys("{ENTER}")}', 4000);
 	window.print();
 }
 
@@ -267,11 +267,12 @@ function on_load(){
 	var isPrint = IsKey(arr_cmd, '/print');
 	var isSaveText =  IsKey(arr_cmd, '/savetext');
 	var isSaveXML =  IsKey(arr_cmd, '/savexml');
+	var isClose =  IsKey(arr_cmd, '/close');
 	var isHelp =  IsKey(arr_cmd, '/help') || IsKey(arr_cmd, '/?');
 	if (isHelp) {
 		var WshShell = new ActiveXObject("WScript.Shell");
 		var msg = 'Ключи командной строки:\n';
-			msg += '/print\t\t- печать файла\n  /savetext DIR\t- сохранить как текст в папке DIR\n  /savexml DIR\t- сохранить как xml в папке DIR\n  /help или /?\t- эта подсказка';
+			msg += '  /Print\t\t- печать файла\n  /SaveText DIR\t- сохранить как текст в папке DIR\n  /SaveXML DIR\t- сохранить как xml в папке DIR\n  /Close\t- закрыть программу через 10 сек\n  /help или /?\t- эта подсказка';
 		WshShell.Popup(msg, 0, "UFEBS Viewer", 64);
 		self.close();
 	}
@@ -286,6 +287,7 @@ function on_load(){
 	if (typeof(isSaveText)=='string') Save(isSaveText + '\\' + fileName + '.txt', text);
 
 	if (isPrint) Print(true);
+	if (isClose) setTimeout('close()', 10000);
 }
 </script>
 </head>
