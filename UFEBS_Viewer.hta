@@ -8,7 +8,7 @@
 	icon=msxml3.dll
 	innerBorder=no
 	contextMenu=no
-	version=1.1.0
+	version=1.2.0
 	author=mozers™, mozers@mail.ru, icq#256106175
 >
 <style type="text/css">
@@ -99,6 +99,14 @@ function SetFileAssociation(){
 				WshShell.RegWrite('HKCR\\UFEBSfile\\shell\\UFEBS_Viewer\\command\\', xml_viever_cmd);
 			}
 		}
+	}
+	// Создание ярлыка в контекстном меню "Отправить"
+	with (WshShell.CreateShortcut(WshShell.SpecialFolders("SendTo") + "\\UFEBS Viewer.lnk")){
+		TargetPath = 'mshta.exe';
+		Arguments = unescape(document.URL).replace(/^file:\/\/(.+)$/, '$1');
+		IconLocation = 'msxml3.dll';
+		Description = "Просмотр файлов УФЭБС";
+		Save();
 	}
 }
 
