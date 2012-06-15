@@ -8,7 +8,7 @@
 	icon=msxml3.dll
 	innerBorder=no
 	contextMenu=no
-	version=1.2.1
+	version=1.3.0
 	author=mozers™, mozers@mail.ru, icq#256106175
 >
 <style type="text/css">
@@ -31,35 +31,38 @@ var oXML;                 // объект, хранящий содержимое
 var text = '';            // текст преобразованного файла
 var msxml_version = '';   // версия Microsoft Core XML Services (MSXML)
 var ED, reportID;         // атрибуты УФЭБС документа
-var INI = {};             // объект, хранящий в виде параметров все ключи ini-файла
 var script_path = unescape(document.URL).replace(/^file:\/\/(.+?)[^\\]+$/, '$1'); // путь к данному скрипту
 
 // Чтение ini-файла в объект INI
-ReadINIFile(script_path + "\\UFEBS_Viewer.ini");
+var INI = ReadINIFile(script_path + "\\UFEBS_Viewer.ini");
 
-// Чтение ini файла в объект INI со свойствами идентичными именам ключей
+// Чтение ini файла в объект со свойствами идентичными именам ключей
 function ReadINIFile(ini_file) {
+	var oINI = {};
 	var FSO = new ActiveXObject("Scripting.FileSystemObject");
 	if ((FSO.FileExists(ini_file)) && (FSO.GetFile(ini_file).Size > 0)) {
 		with (FSO.OpenTextFile(ini_file)) {
 			var text = ReadAll();
 			Close();
-			var arr_lines = text.split('\n');
-			var section, param, value;
-			for (var i in arr_lines){
-				if (/^\[(\w+)\]/.test(arr_lines[i])){
+		}
+		var arr_lines = text.match(/[^\r\n]+/g);
+		var section, param, value;
+		for(var i = 0, line; line = arr_lines[i++];) {
+			line = line.replace(/^\s*/, '').replace(/\s*$/, '');
+			if (!/^[;#]/.test(line)) {        // comment
+				if (/^\[(.+)\]/.test(line)) { // section
 					section = RegExp.$1;
-					if (!INI[section]) INI[section] = {};
+					if ((section) && (!oINI[section])) oINI[section] = {};
 				}
-				if (/^([^;#][^=]*?)\s*=\s*([^\r\n]*?)\s*$/.test(arr_lines[i])){
+				else if (/^(.+?)\s*=\s*(.+)/.test(line)){ // param=value
 					param = RegExp.$1;
 					value = RegExp.$2;
-					INI[section][param] = value;
+					oINI[section][param] = value;
 				}
 			}
 		}
 	}
-	return INI;
+	return oINI;
 }
 
 // Инициализируем самую последнюю доступную версию Microsoft Core XML Services (MSXML)
