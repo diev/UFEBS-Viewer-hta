@@ -2,11 +2,18 @@
 <!-- Версия для работы с РАБИС-НП, 2.5.1 от 19-12-2011
 	XSLT для вывода справок
 -->
-<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns:ed="urn:cbr-ru:ed:v2.0"
-xmlns:env="http://www.w3.org/2003/05/soap-envelope"  xmlns:props="urn:cbr-ru:msg:props:v1.3"
+
+<xsl:stylesheet version="1.0"
+xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+xmlns:ed="urn:cbr-ru:ed:v2.0"
+xmlns:env="http://www.w3.org/2003/05/soap-envelope"
+xmlns:props="urn:cbr-ru:msg:props:v1.3"
 xmlns:sen="urn:cbr-ru:dsig:env:v1.1"
 xmlns:dsig="urn:cbr-ru:dsig:v1.1"
-xmlns:xf="http://www.w3.org/2002/08/xquery-functions">
+xmlns:xf="http://www.w3.org/2002/08/xquery-functions"
+xmlns:msxsl="urn:schemas-microsoft-com:xslt"
+xmlns:usr="urn:user-functions">
+
 <xsl:output method="text" media-type="text/plain" encoding="WINDOWS-1251" indent="yes"/>
 
 <xsl:template match="/">
@@ -674,7 +681,7 @@ xmlns:xf="http://www.w3.org/2002/08/xquery-functions">
 	<xsl:text>&#13;&#10;</xsl:text>
 	<xsl:text>БИК банка корреспондента   : </xsl:text><xsl:value-of select="@BICCorr"/>
 	<xsl:text>&#13;&#10;</xsl:text>
-	<xsl:text>Сумма: </xsl:text><xsl:for-each select="@Sum"><xsl:call-template name="sum"/></xsl:for-each>
+	<xsl:text>Сумма                      : </xsl:text><xsl:value-of select="usr:fSum(@Sum)"/>
 	<xsl:text>&#13;&#10;</xsl:text>
 	<xsl:text>Корреспондирующий счет     : </xsl:text><xsl:value-of select="@CorrAcc"/>
 	<xsl:text>&#13;&#10;</xsl:text>
@@ -867,7 +874,7 @@ xmlns:xf="http://www.w3.org/2002/08/xquery-functions">
 	<xsl:text>&#13;&#10;</xsl:text>
 	<xsl:text> &#13;&#10;</xsl:text>
 	<xsl:text>Сумма ЭПД АУР, направленных в ЦОиР и ожидающих подтверждения из ЦОиР: </xsl:text>
-	<xsl:for-each select="@RTGSUnconfirmedED"><xsl:call-template name="sum0"/></xsl:for-each>
+	<xsl:value-of select="usr:fSum(@RTGSUnconfirmedED)"/>
 	<xsl:text>&#13;&#10;</xsl:text>
 	<xsl:text> &#13;&#10;</xsl:text>
 	<xsl:text>Период формирования выписки: </xsl:text>
@@ -1673,8 +1680,9 @@ xmlns:xf="http://www.w3.org/2002/08/xquery-functions">
 	<xsl:text>~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~</xsl:text>
 	<xsl:text>&#13;&#10;</xsl:text>
 	<xsl:value-of select="concat(position()-$modif_pos,'.  ')"/>
-	<xsl:text>ОТВЕТ НА ЗАПРОС УЧАСТНИКА /ED244/ </xsl:text>
+	<xsl:text>ОТВЕТ НА ЗАПРОС ПО ЭПД УЧАСТНИКА /ED244/ </xsl:text>
 	<xsl:call-template name="PriznGr"/>
+	<xsl:text> &#13;&#10;</xsl:text>
 	<xsl:text>Код запроса : </xsl:text><xsl:value-of select="@EDDefineRequestCode"/>
 	<xsl:if test="@EDDefineRequestCode = 00">
 	<xsl:text> (Направление получателю информации без исходного запроса)</xsl:text>
@@ -1729,120 +1737,128 @@ xmlns:xf="http://www.w3.org/2002/08/xquery-functions">
 	<xsl:if test="@EDDefineAnswerCode = 08">
 	<xsl:text> (Сообщаем значение поля (полей) расчетного документа с указанным номером (номерами).)</xsl:text>
 	</xsl:if>
+	<xsl:text> &#13;&#10;</xsl:text>
 
+	<xsl:text> &#13;&#10;</xsl:text>
+	<xsl:text> Идентификаторы исходного ЭПД </xsl:text>
 	<xsl:text>&#13;&#10;</xsl:text>
-
-	<xsl:text>Идентификаторы исходного ЭПД : </xsl:text>
-	<xsl:text>№ </xsl:text><xsl:value-of select="ed:OriginalEPD/@EDNo"/>
-	<xsl:text> от </xsl:text>
+	<xsl:text>------------------------------</xsl:text>
+	<xsl:text>&#13;&#10;</xsl:text>
+	<xsl:text>Номер ЭД в течение опердня           : </xsl:text><xsl:value-of select="ed:OriginalEPD/@EDNo"/>
+	<xsl:text>&#13;&#10;</xsl:text>
+	<xsl:text>Дата составления ЭД                  : </xsl:text>
 	<xsl:for-each select="ed:OriginalEPD/@EDDate"><xsl:call-template name="date"/></xsl:for-each>
-	<xsl:text> УИС : </xsl:text><xsl:value-of select="ed:OriginalEPD/@EDAuthor"/>
+	<xsl:text>&#13;&#10;</xsl:text>
+	<xsl:text>Уникальный идентификатор составителя : </xsl:text><xsl:value-of select="ed:OriginalEPD/@EDAuthor"/>
 	<xsl:text>&#13;&#10;&#10;</xsl:text>
 
-	<xsl:text>Реквизиты ЭПД, поясняющие ответ </xsl:text>
+	<xsl:text> &#13;&#10;</xsl:text>
+	<xsl:text> Реквизиты ЭПД, поясняющие ответ </xsl:text>
 	<xsl:text>&#13;&#10;</xsl:text>
-	<xsl:text>--------------------------------------</xsl:text>
+	<xsl:text>---------------------------------</xsl:text>
 	<xsl:text>&#13;&#10;</xsl:text>
 	<xsl:if test="ed:EDDefineAnswerInfo/@AccDocNo != ''">
-	<xsl:text>Номер расчетного документа        : </xsl:text><xsl:value-of select="ed:EDDefineAnswerInfo/@AccDocNo"/>
+	<xsl:text>Номер расчетного документа           : </xsl:text><xsl:value-of select="ed:EDDefineAnswerInfo/@AccDocNo"/>
 	<xsl:text>&#13;&#10;</xsl:text>
 	</xsl:if>
 	<xsl:if test="ed:EDDefineAnswerInfo/@AccDocDate != ''">
-	<xsl:text>Дата выписки расчетного документа : </xsl:text>
+	<xsl:text>Дата выписки расчетного документа    : </xsl:text>
 	<xsl:for-each select="ed:EDDefineAnswerInfo/@AccDocDate"><xsl:call-template name="date"/></xsl:for-each>
 	<xsl:text>&#13;&#10;</xsl:text>
 	</xsl:if>
 	<xsl:if test="ed:EDDefineAnswerInfo/@PayerAcc != ''">
-	<xsl:text>Номер счета плательщика           : </xsl:text><xsl:value-of select="ed:EDDefineAnswerInfo/@PayerAcc"/>
+	<xsl:text>Номер счета плательщика              : </xsl:text><xsl:value-of select="ed:EDDefineAnswerInfo/@PayerAcc"/>
 	<xsl:text>&#13;&#10;</xsl:text>
 	</xsl:if>
 	<xsl:if test="ed:EDDefineAnswerInfo/@PayeeAcc != ''">
-	<xsl:text>Номер счета получателя            : </xsl:text><xsl:value-of select="ed:EDDefineAnswerInfo/@PayeeAcc"/>
+	<xsl:text>Номер счета получателя               : </xsl:text><xsl:value-of select="ed:EDDefineAnswerInfo/@PayeeAcc"/>
 	<xsl:text>&#13;&#10;</xsl:text>
 	</xsl:if>
 	<xsl:if test="ed:EDDefineAnswerInfo/@PayerINN != ''">
-	<xsl:text>ИНН плательщика                   : </xsl:text><xsl:value-of select="ed:EDDefineAnswerInfo/@PayerINN"/>
+	<xsl:text>ИНН плательщика                      : </xsl:text><xsl:value-of select="ed:EDDefineAnswerInfo/@PayerINN"/>
 	<xsl:text>&#13;&#10;</xsl:text>
 	</xsl:if>
 	<xsl:if test="ed:EDDefineAnswerInfo/@PayeeINN != ''">
-	<xsl:text>ИНН получателя                    : </xsl:text><xsl:value-of select="ed:EDDefineAnswerInfo/@PayeeINN"/>
+	<xsl:text>ИНН получателя                       : </xsl:text><xsl:value-of select="ed:EDDefineAnswerInfo/@PayeeINN"/>
 	<xsl:text>&#13;&#10;</xsl:text>
 	</xsl:if>
 	<xsl:if test="ed:EDDefineAnswerInfo/@Sum != ''">
-	<xsl:text>Сумма : </xsl:text>
-	<xsl:for-each select="ed:EDDefineAnswerInfo/@Sum"><xsl:call-template name="sum"/></xsl:for-each>
+	<xsl:text>Сумма                                : </xsl:text>
+	<xsl:value-of select="usr:fSum(ed:EDDefineAnswerInfo/@Sum)"/>
 	<xsl:text>&#13;&#10;</xsl:text>
 	</xsl:if>
 	<xsl:if test="ed:EDDefineAnswerInfo/ed:PayerLongName != ''">
-	<xsl:text>Наименование плательщика          : </xsl:text><xsl:value-of select="ed:EDDefineAnswerInfo/ed:PayerLongName"/>
+	<xsl:text>Наименование плательщика             : </xsl:text><xsl:value-of select="ed:EDDefineAnswerInfo/ed:PayerLongName"/>
 	<xsl:text>&#13;&#10;</xsl:text>
 	</xsl:if>
 	<xsl:if test="ed:EDDefineAnswerInfo/ed:PayeeLongName != ''">
-	<xsl:text>Наименование получателя           : </xsl:text><xsl:value-of select="ed:EDDefineAnswerInfo/ed:PayeeLongName"/>
+	<xsl:text>Наименование получателя              : </xsl:text><xsl:value-of select="ed:EDDefineAnswerInfo/ed:PayeeLongName"/>
 	<xsl:text>&#13;&#10;</xsl:text>
 	</xsl:if>
 	<xsl:if test="ed:EDDefineAnswerInfo/ed:Purpose != ''">
-	<xsl:text>Назначение платежа                : </xsl:text><xsl:value-of select="ed:EDDefineAnswerInfo/ed:Purpose"/>
+	<xsl:text>Назначение платежа                   : </xsl:text><xsl:value-of select="ed:EDDefineAnswerInfo/ed:Purpose"/>
 	<xsl:text>&#13;&#10;</xsl:text>
 	</xsl:if>
 	<xsl:if test="ed:EDDefineAnswerInfo/ed:Address != ''">
-	<xsl:text>Адрес                             : </xsl:text><xsl:value-of select="ed:EDDefineAnswerInfo/ed:Address"/>
+	<xsl:text>Адрес                                : </xsl:text><xsl:value-of select="ed:EDDefineAnswerInfo/ed:Address"/>
 	<xsl:text>&#13;&#10;</xsl:text>
 	</xsl:if>
 
-	<xsl:text>&#13;&#10;</xsl:text>
-	<xsl:text>Список полей расчетного документа </xsl:text>
-	<xsl:text>&#13;&#10;</xsl:text>
-	<xsl:text>------------------------------------</xsl:text>
-	<xsl:text>&#13;&#10;</xsl:text>
-	<xsl:if test="ed:EDDefineAnswerInfo/ed:AccDocAddInfo/@PayerINN != ''">
-	<xsl:text>ИНН плательщика (поле 60)  : </xsl:text><xsl:value-of select="ed:EDDefineAnswerInfo/ed:AccDocAddInfo/@PayerINN"/>
-	<xsl:text>&#13;&#10;</xsl:text>
-	</xsl:if>
-	<xsl:if test="ed:EDDefineAnswerInfo/ed:AccDocAddInfo/@PayeeINN != ''">
-	<xsl:text>ИНН получателя (поле 61 )  : </xsl:text><xsl:value-of select="ed:EDDefineAnswerInfo/ed:AccDocAddInfo/@PayeeINN"/>
-	<xsl:text>&#13;&#10;</xsl:text>
-	</xsl:if>
-	<xsl:if test="ed:EDDefineAnswerInfo/ed:AccDocAddInfo/@DrawerStatus != ''">
-	<xsl:text>Статус составителя расчетного документа (поле 101) : </xsl:text>
-	<xsl:value-of select="ed:EDDefineAnswerInfo/ed:AccDocAddInfo/@DrawerStatus"/>
-	<xsl:text>&#13;&#10;</xsl:text>
-	</xsl:if>
-	<xsl:if test="ed:EDDefineAnswerInfo/ed:AccDocAddInfo/@PayerKPP != ''">
-	<xsl:text>КПП плательщика (поле 102) : </xsl:text><xsl:value-of select="ed:EDDefineAnswerInfo/ed:AccDocAddInfo/@PayerKPP"/>
-	<xsl:text>&#13;&#10;</xsl:text>
-	</xsl:if>
-	<xsl:if test="ed:EDDefineAnswerInfo/ed:AccDocAddInfo/@PayeeKPP != ''">
-	<xsl:text>КПП получателя(поле 103)   : </xsl:text><xsl:value-of select="ed:EDDefineAnswerInfo/ed:AccDocAddInfo/@PayeeKPP"/>
-	<xsl:text>&#13;&#10;</xsl:text>
-	</xsl:if>
-	<xsl:if test="ed:EDDefineAnswerInfo/ed:AccDocAddInfo/@CBC != ''">
-	<xsl:text>Код бюджетной классификации (поле 104): </xsl:text><xsl:value-of select="ed:EDDefineAnswerInfo/ed:AccDocAddInfo/@CBC"/>
-	<xsl:text>&#13;&#10;</xsl:text>
-	</xsl:if>
-	<xsl:if test="ed:EDDefineAnswerInfo/ed:AccDocAddInfo/@OKATO != ''">
-	<xsl:text>Код ОКАТО (поле 105)       : </xsl:text><xsl:value-of select="ed:EDDefineAnswerInfo/ed:AccDocAddInfo/@OKATO"/>
-	<xsl:text>&#13;&#10;</xsl:text>
-	</xsl:if>
-	<xsl:if test="ed:EDDefineAnswerInfo/ed:AccDocAddInfo/@PaytReason != ''">
-	<xsl:text>Основание налогового платежа (поле 106): </xsl:text><xsl:value-of select="ed:EDDefineAnswerInfo/ed:AccDocAddInfo/@PaytReason"/>
-	<xsl:text>&#13;&#10;</xsl:text>
-	</xsl:if>
-	<xsl:if test="ed:EDDefineAnswerInfo/ed:AccDocAddInfo/@TaxPeriod != ''">
-	<xsl:text>Налоговый период (поле 107): </xsl:text><xsl:value-of select="ed:EDDefineAnswerInfo/ed:AccDocAddInfo/@TaxPeriod"/>
-	<xsl:text>&#13;&#10;</xsl:text>
-	</xsl:if>
-	<xsl:if test="ed:EDDefineAnswerInfo/ed:AccDocAddInfo/@DocNo != ''">
-	<xsl:text>Номер налогового документа (поле 108): </xsl:text><xsl:value-of select="ed:EDDefineAnswerInfo/ed:AccDocAddInfo/@DocNo"/>
-	<xsl:text>&#13;&#10;</xsl:text>
-	</xsl:if>
-	<xsl:if test="ed:EDDefineAnswerInfo/ed:AccDocAddInfo/@DocDate != ''">
-	<xsl:text>Дата налогового документа (поле 109) : </xsl:text><xsl:value-of select="ed:EDDefineAnswerInfo/ed:AccDocAddInfo/@DocDate"/>
-	<xsl:text>&#13;&#10;</xsl:text>
-	</xsl:if>
-	<xsl:if test="ed:EDDefineAnswerInfo/ed:AccDocAddInfo/@TaxPaytKind != ''">
-	<xsl:text>Тип налогового платежа (поле 110)    : </xsl:text><xsl:value-of select="ed:EDDefineAnswerInfo/ed:AccDocAddInfo/@TaxPaytKind"/>
-	<xsl:text>&#13;&#10;</xsl:text>
+	<xsl:if test="ed:EDDefineAnswerInfo/ed:AccDocAddInfo/@*">
+		<xsl:text> &#13;&#10;</xsl:text>
+		<xsl:text> Список полей расчетного документа </xsl:text>
+		<xsl:text>&#13;&#10;</xsl:text>
+		<xsl:text>-----------------------------------</xsl:text>
+		<xsl:text>&#13;&#10;</xsl:text>
+		<xsl:if test="ed:EDDefineAnswerInfo/ed:AccDocAddInfo/@PayerINN != ''">
+		<xsl:text>ИНН плательщика (поле 60)        : </xsl:text><xsl:value-of select="ed:EDDefineAnswerInfo/ed:AccDocAddInfo/@PayerINN"/>
+		<xsl:text>&#13;&#10;</xsl:text>
+		</xsl:if>
+		<xsl:if test="ed:EDDefineAnswerInfo/ed:AccDocAddInfo/@PayeeINN != ''">
+		<xsl:text>ИНН получателя (поле 61 )        : </xsl:text><xsl:value-of select="ed:EDDefineAnswerInfo/ed:AccDocAddInfo/@PayeeINN"/>
+		<xsl:text>&#13;&#10;</xsl:text>
+		</xsl:if>
+		<xsl:if test="ed:EDDefineAnswerInfo/ed:AccDocAddInfo/@DrawerStatus != ''">
+		<xsl:text>Статус составителя расчетного документа (поле 101) : </xsl:text>
+		<xsl:value-of select="ed:EDDefineAnswerInfo/ed:AccDocAddInfo/@DrawerStatus"/>
+		<xsl:text>&#13;&#10;</xsl:text>
+		</xsl:if>
+		<xsl:if test="ed:EDDefineAnswerInfo/ed:AccDocAddInfo/@PayerKPP != ''">
+		<xsl:text>КПП плательщика (поле 102)       : </xsl:text><xsl:value-of select="ed:EDDefineAnswerInfo/ed:AccDocAddInfo/@PayerKPP"/>
+		<xsl:text>&#13;&#10;</xsl:text>
+		</xsl:if>
+		<xsl:if test="ed:EDDefineAnswerInfo/ed:AccDocAddInfo/@PayeeKPP != ''">
+		<xsl:text>КПП получателя(поле 103)         : </xsl:text><xsl:value-of select="ed:EDDefineAnswerInfo/ed:AccDocAddInfo/@PayeeKPP"/>
+		<xsl:text>&#13;&#10;</xsl:text>
+		</xsl:if>
+		<xsl:if test="ed:EDDefineAnswerInfo/ed:AccDocAddInfo/@CBC != ''">
+		<xsl:text>Код бюджетной классификации (поле 104): </xsl:text><xsl:value-of select="ed:EDDefineAnswerInfo/ed:AccDocAddInfo/@CBC"/>
+		<xsl:text>&#13;&#10;</xsl:text>
+		</xsl:if>
+		<xsl:if test="ed:EDDefineAnswerInfo/ed:AccDocAddInfo/@OKATO != ''">
+		<xsl:text>Код ОКАТО (поле 105)             : </xsl:text><xsl:value-of select="ed:EDDefineAnswerInfo/ed:AccDocAddInfo/@OKATO"/>
+		<xsl:text>&#13;&#10;</xsl:text>
+		</xsl:if>
+		<xsl:if test="ed:EDDefineAnswerInfo/ed:AccDocAddInfo/@PaytReason != ''">
+		<xsl:text>Основание налогового платежа (поле 106): </xsl:text><xsl:value-of select="ed:EDDefineAnswerInfo/ed:AccDocAddInfo/@PaytReason"/>
+		<xsl:text>&#13;&#10;</xsl:text>
+		</xsl:if>
+		<xsl:if test="ed:EDDefineAnswerInfo/ed:AccDocAddInfo/@TaxPeriod != ''">
+		<xsl:text>Налоговый период (поле 107)      : </xsl:text><xsl:value-of select="ed:EDDefineAnswerInfo/ed:AccDocAddInfo/@TaxPeriod"/>
+		<xsl:text>&#13;&#10;</xsl:text>
+		</xsl:if>
+		<xsl:if test="ed:EDDefineAnswerInfo/ed:AccDocAddInfo/@DocNo != ''">
+		<xsl:text>Номер налогового документа (поле 108): </xsl:text><xsl:value-of select="ed:EDDefineAnswerInfo/ed:AccDocAddInfo/@DocNo"/>
+		<xsl:text>&#13;&#10;</xsl:text>
+		</xsl:if>
+		<xsl:if test="ed:EDDefineAnswerInfo/ed:AccDocAddInfo/@DocDate != ''">
+		<xsl:text>Дата налогового документа (поле 109) : </xsl:text><xsl:value-of select="ed:EDDefineAnswerInfo/ed:AccDocAddInfo/@DocDate"/>
+		<xsl:text>&#13;&#10;</xsl:text>
+		</xsl:if>
+		<xsl:if test="ed:EDDefineAnswerInfo/ed:AccDocAddInfo/@TaxPaytKind != ''">
+		<xsl:text>Тип налогового платежа (поле 110)    : </xsl:text><xsl:value-of select="ed:EDDefineAnswerInfo/ed:AccDocAddInfo/@TaxPaytKind"/>
+		<xsl:text>&#13;&#10;</xsl:text>
+		</xsl:if>
 	</xsl:if>
 	<xsl:text>&#13;&#10;</xsl:text>
 	<xsl:if test="ed:InitialED/@EDNo != ''">
@@ -2712,12 +2728,17 @@ xmlns:xf="http://www.w3.org/2002/08/xquery-functions">
 
 <!--  InitialED  -->
 <xsl:template match="ed:InitialED">
-	<!--  <xsl:text>&#13;&#10;</xsl:text>  -->
-	<xsl:text>Идентификаторы исходного ЭСИД : </xsl:text>
-	<xsl:text>    № </xsl:text><xsl:value-of select="@EDNo"/>
-	<xsl:text>  от </xsl:text>
+	<xsl:text> &#13;&#10;</xsl:text>
+	<xsl:text> Идентификаторы исходного ЭСИД - запроса </xsl:text>
+	<xsl:text>&#13;&#10;</xsl:text>
+	<xsl:text>-----------------------------------------</xsl:text>
+	<xsl:text>&#13;&#10;</xsl:text>
+	<xsl:text>Номер расчетного документа           : </xsl:text><xsl:value-of select="@EDNo"/>
+	<xsl:text>&#13;&#10;</xsl:text>
+	<xsl:text>Дата выписки расчетного документа    : </xsl:text>
 	<xsl:for-each select="@EDDate"><xsl:call-template name="date"/></xsl:for-each>
-	<xsl:text>    УИС : </xsl:text><xsl:value-of select="@EDAuthor"/>
+	<xsl:text>&#13;&#10;</xsl:text>
+	<xsl:text>Уникальный идентификатор составителя : </xsl:text><xsl:value-of select="@EDAuthor"/>
 	<xsl:text>&#13;&#10;</xsl:text>
 </xsl:template>
 
@@ -2737,11 +2758,6 @@ xmlns:xf="http://www.w3.org/2002/08/xquery-functions">
 
 <xsl:variable name="modif_pos" select="count(ed:PacketEPD/dsig:SigValue) + count(ed:PacketESID/dsig:SigValue) +
 	count(ed:PacketESID/ed:InitialPacketED)" />
-
-<!--  Преобразование суммы из копеек в формат "рубли.копейки" (без отступа) -->
-<xsl:template name="sum0">
-	<xsl:value-of select = "concat(substring(concat('00',current()),1,string-length(concat('00',current()))-2), '.', substring(concat('000',current()),string-length(concat('000',current()))-1,2))"/>
-</xsl:template>
 
 <!--  Преобразование суммы из копеек в формат "рубли.копейки"  -->
 <!--  Значение дополнено слева пробелами до 21 символа -->
@@ -2903,5 +2919,19 @@ xmlns:xf="http://www.w3.org/2002/08/xquery-functions">
 	<xsl:text>Сумма лимита    : </xsl:text><xsl:for-each select="@LimitSum"><xsl:call-template name="fsum"/></xsl:for-each>
 	<xsl:text>&#13;&#10;&#10;</xsl:text>
 </xsl:template>
+
+<msxsl:script language="JScript" implements-prefix="usr">
+<![CDATA[
+	// Преобразование даты из формата ГГГГ-ММ-ДД в ДД.ММ.ГГГГ
+	function fDate(s){
+		return s[0].text.replace(/(\d{4})\-(\d{2})\-(\d{2})/, '$3.$2.$1');
+	}
+
+	// Преобразование суммы из копеек в формат "рубли.копейки"
+	function fSum(s){
+		return ('00'+s[0].text).replace(/0*(\d+)(\d\d)$/, '$1.$2');
+	}
+]]>
+</msxsl:script>
 
 </xsl:stylesheet>
