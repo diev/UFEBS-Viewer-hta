@@ -8,7 +8,7 @@
 	icon=msxml3.dll
 	innerBorder=no
 	contextMenu=no
-	version=1.4.0
+	version=1.4.1
 	author=mozers™, mozers@mail.ru, icq#256106175
 >
 <style type="text/css">
@@ -252,6 +252,7 @@ function LoadXMLFile(){
 
 		var oXSLT = MSXML_Init();
 		oXSLT.async = false;
+		oXSLT.setProperty ("AllowXsltScript", true);
 		oXSLT.load ("forms.xslt");
 		with (oXML.documentElement) {
 			if (INI.Info.BIC) setAttribute('InfoBIC', INI.Info.BIC);
