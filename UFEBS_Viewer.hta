@@ -3,14 +3,14 @@
 <meta http-equiv=content-type content="text-html; charset=utf-8">
 <meta http-equiv=MSThemeCompatible content=yes>
 <hta:application
-	id=idUFEBS_Viewer
-	applicationName=UFEBS_Viewer
-	icon=msxml3.dll
-	innerBorder=no
-	contextMenu=no
-	version=1.4.1
-	author=mozers™, mozers@mail.ru, icq#256106175
->
+	id="idUFEBS_Viewer"
+	applicationName="UFEBS Viewer"
+	icon="msxml3.dll"
+	innerBorder="no"
+	contextMenu="no"
+	version="1.4.2"
+	author="mozers™, mozers@mail.ru, icq#256106175"
+ />
 <style type="text/css">
 	*             {margin:4px; cursor:default;} /*общие определения*/
 	table.help    {position:relative; top:-8px; left:-8px; background-color:#FFFFCC; border:1px solid #999900;}                              /*подсказка*/
@@ -248,7 +248,7 @@ function LoadXMLFile(){
 			ED = nodeName;
 			reportID = getAttribute("ReportID");
 		}
-		document.title = (obj64 ? '[base64 :: ' : '[') + ED + ' :: ' + fileNameExt + ' :: MSXML ' + msxml_version + '] - ' + idUFEBS_Viewer.applicationName.replace(/_/g,' ') + ' v.' + idUFEBS_Viewer.version;
+		document.title = (obj64 ? '[base64 :: ' : '[') + ED + ' :: ' + fileNameExt + ' :: MSXML ' + msxml_version + '] - ' + idUFEBS_Viewer.applicationName + ' v.' + idUFEBS_Viewer.version;
 
 		var oXSLT = MSXML_Init();
 		oXSLT.async = false;
