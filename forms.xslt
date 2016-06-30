@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Версия для работы с РАБИС-НП, 2.5.1 от 19-12-2011
 	XSLT для вывода справок
+
+2016-06-29 Dmitrii Evdokimov <diev@mail.ru>:
+	добавлены PacketEID и ED275 согласно "УФЭБС. Обмен с клиентами Банка России"
+	(http://cbr.ru/analytics/formats/UFEBS_v2016_3_1.zip)
 -->
 
 <xsl:stylesheet version="1.0"
@@ -19,6 +23,7 @@ xmlns:usr="urn:user-functions">
 <xsl:template match="/">
 	<xsl:apply-templates select="ed:PacketEPD"/>
 	<xsl:apply-templates select="ed:PacketESID"/>
+	<xsl:apply-templates select="ed:PacketEID"/>
 	<xsl:apply-templates select="ed:ED101"/>
 	<xsl:apply-templates select="ed:ED103"/>
 	<xsl:apply-templates select="ed:ED104"/>
@@ -49,6 +54,7 @@ xmlns:usr="urn:user-functions">
 	<xsl:apply-templates select="ed:ED242"/>
 	<xsl:apply-templates select="ed:ED243"/>
 	<xsl:apply-templates select="ed:ED244"/>
+	<xsl:apply-templates select="ed:ED275"/>
 	<xsl:apply-templates select="ed:ED301"/>
 	<xsl:apply-templates select="ed:ED306"/>
 	<xsl:apply-templates select="ed:ED330"/>
@@ -136,6 +142,44 @@ xmlns:usr="urn:user-functions">
 	<xsl:text> УИС : </xsl:text><xsl:value-of select="ed:InitialPacketED/@EDAuthor"/>
 	<xsl:text>&#13;&#10;</xsl:text>
 	</xsl:if>
+	<xsl:apply-templates/>
+</xsl:template>
+
+<!-- =============================================================================================================
+	Пакет информационных ЭС
+================================================================================================================== -->
+<xsl:template match="ed:PacketEID">
+	<xsl:text>&#13;&#10;</xsl:text>
+	<xsl:text>ПАКЕТ ИНФОРМАЦИОННЫХ ЭС</xsl:text>
+	<xsl:call-template name="PriznGr"/>
+	<xsl:choose>
+		<xsl:when test="@EDCreationTime">
+			<xsl:text>Время составления ЭС : </xsl:text>
+			<xsl:value-of select="@EDCreationTime"/>
+			<xsl:text>&#13;&#10;</xsl:text>
+		</xsl:when>
+		<xsl:otherwise>
+			<xsl:text>&#13;&#10;</xsl:text>
+		</xsl:otherwise>
+	</xsl:choose>
+	<xsl:text>&#13;&#10;</xsl:text>
+
+	<xsl:if test="count(ed:ED208)!=0">
+		<xsl:text>Принято                : </xsl:text>
+		<xsl:value-of select="count(ed:ED208[@ResultCode = 1])"/>
+		<xsl:text>&#13;&#10;</xsl:text>
+		<xsl:text>Передано получателю    : </xsl:text>
+		<xsl:value-of select="count(ed:ED208[@ResultCode = 2])"/>
+		<xsl:text>&#13;&#10;</xsl:text>
+		<xsl:text>Не передано получателю : </xsl:text>
+		<xsl:value-of select="count(ed:ED208[@ResultCode = 3])"/>
+		<xsl:text>&#13;&#10;</xsl:text>
+		<xsl:text>&#13;&#10;</xsl:text>
+	</xsl:if>
+
+	<xsl:text>Содержит: </xsl:text>
+	<xsl:text>&#13;&#10;</xsl:text>
+	<xsl:text>&#13;&#10;</xsl:text>
 	<xsl:apply-templates/>
 </xsl:template>
 
@@ -1865,6 +1909,41 @@ xmlns:usr="urn:user-functions">
 	<xsl:text>&#13;&#10;</xsl:text>
 	<xsl:apply-templates select="ed:InitialED"/>
 	</xsl:if>
+	<xsl:text>&#13;&#10;</xsl:text>
+</xsl:template>
+
+<!--  ED275  -->
+<xsl:template match="ed:ED275">
+	<xsl:text>~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~</xsl:text>
+	<xsl:text>&#13;&#10;</xsl:text>
+	<xsl:value-of select="concat(position()-$modif_pos,'.  ')"/>
+	<xsl:text>ЗАПРОС НА ОТЗЫВ ВЫСТАВЛЕННОГО НА ОПЛАТУ &#13;&#10;</xsl:text>
+	<xsl:text>    ПЛАТЕЖНОГО ТРЕБОВАНИЯ / ИНКАССОВОГО ПОРУЧЕНИЯ /ED275/&#13;&#10;</xsl:text>
+	<xsl:call-template name="PriznGr"/>
+	<xsl:text>&#13;&#10;</xsl:text>
+	<xsl:text>Вид операции                 : </xsl:text><xsl:value-of select="@TransKind"/>
+	<xsl:text>&#13;&#10;</xsl:text>
+	<xsl:text>Сумма                        : </xsl:text>
+	<xsl:for-each select="@Sum"><xsl:call-template name="fsum"/></xsl:for-each>
+	<xsl:text>&#13;&#10;</xsl:text>
+	<xsl:text>Лицевой счет плательщика     : </xsl:text><xsl:value-of select="@PayerPersonalAcc"/>
+	<xsl:text>&#13;&#10;</xsl:text>
+	<xsl:text>БИК банка плательщика        : </xsl:text><xsl:value-of select="@PayerBIC"/>
+	<xsl:text>&#13;&#10;</xsl:text>
+	<xsl:text>Номер счета банка плательщика: </xsl:text><xsl:value-of select="@PayerCorrespAcc"/>
+	<xsl:text>&#13;&#10;</xsl:text>
+	<xsl:text>Лицевой счет получателя      : </xsl:text><xsl:value-of select="@PayeePersonalAcc"/>
+	<xsl:text>&#13;&#10;</xsl:text>
+	<xsl:text>БИК банка получателя         : </xsl:text><xsl:value-of select="@PayeeBIC"/>
+	<xsl:text>&#13;&#10;</xsl:text>
+	<xsl:text>Номер счета банка получателя : </xsl:text><xsl:value-of select="@PayeeCorrespAcc"/>
+	<xsl:text>&#13;&#10;</xsl:text>
+	<xsl:text>&#13;&#10;</xsl:text>
+	<xsl:text>Идентификаторы исходного ЭПС : </xsl:text>
+	<xsl:text>№ </xsl:text><xsl:value-of select="ed:EDRefID/@EDNo"/>
+	<xsl:text> от </xsl:text>
+	<xsl:for-each select="ed:EDRefID/@EDDate"><xsl:call-template name="date"/></xsl:for-each>
+	<xsl:text> УИС : </xsl:text><xsl:value-of select="ed:EDRefID/@EDAuthor"/>
 	<xsl:text>&#13;&#10;</xsl:text>
 </xsl:template>
 
