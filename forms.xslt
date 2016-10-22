@@ -2841,9 +2841,21 @@ xmlns:usr="urn:user-functions">
 <!--  Преобразование суммы из копеек в формат "рубли.копейки"  -->
 <!--  Значение дополнено слева пробелами до 21 символа -->
 <xsl:template name="sum">
-<xsl:value-of
+  <xsl:choose>
+    <xsl:when test="string-length(current()) >2">
+      <xsl:value-of
 	select = "concat(substring('                     ',1,21-string-length(current())),substring(current(),1,
 			string-length(current())-2),'.', substring(current(),string-length(current())-1,2))"/>
+    </xsl:when>
+    <xsl:when test="string-length(current()) >1">
+      <xsl:value-of
+	select = "concat('                  0.',current())"/>
+    </xsl:when>
+    <xsl:otherwise>
+      <xsl:value-of
+	select = "concat('                  0.0',current())"/>
+    </xsl:otherwise>
+  </xsl:choose>
 </xsl:template>
 
 <!--  Преобразование суммы из копеек в формат "рубли.копейки" (рубли отформатированы в группы по 3 знака) -->
