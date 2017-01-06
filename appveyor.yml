@@ -1,0 +1,51 @@
+version: '{build}'
+pull_requests:
+  do_not_increment_build_number: true
+skip_tags: true
+skip_branch_with_pr: true
+init:
+- cmd: git config --global core.autocrlf input
+install:
+- ps: >-
+    $HTAFile = 'UFEBS_Viewer.hta'
+
+    $RegularExpression = [regex] 'version=\"(\d*\.\d*\.\d*)\"$'
+
+    $FileContent = Get-Content $HTAFile
+
+    foreach($content in $FileContent) {
+      $match = [System.Text.RegularExpressions.Regex]::Match($content, $RegularExpression)
+      if($match.Success) {
+        $env:VERSION = $match.groups[1].value
+        break;
+      }
+    }
+
+    Update-AppveyorBuild -Version ("{0} build {1}" -f $env:VERSION, $env:APPVEYOR_BUILD_NUMBER)
+
+    $CommitDateTime = [datetime]::Parse($env:APPVEYOR_REPO_COMMIT_TIMESTAMP)
+
+    $env:BuildDate = $CommitDateTime.AddHours(3).ToString('dd.MM.yyyy')
+
+    Write-Host "Building v$env:APPVEYOR_BUILD_VERSION dated $env:BuildDate"
+build_script:
+- cmd: >-
+    echo UFEBS_Viewer.* >>Package
+
+    echo *.xslt >>Package
+
+    echo README.md >>Package
+
+    7z a UFEBS-Viewer-v%VERSION%.zip @Package
+artifacts:
+- path: UFEBS-Viewer-v$(version).zip
+  name: AppZip
+deploy:
+- provider: GitHub
+  tag: v$(version)
+  release: UFEBS Viewer v$(version)
+  description: '* $(appveyor_repo_commit_message)\n\nThis is an automatic build #$(appveyor_build_number) by AppVeyor $(BuildDate)\nSee more on https://$(appveyor_account_name).github.io/$(appveyor_project_name)/'
+  auth_token:
+    secure: CePfctnBFd3iDwgVWlGOD6mfxQZrNBHK7IpsCK/deo2vHxA3lTr2nRnhbqpKqchQ
+  artifact: AppZip
+  force_update: true
