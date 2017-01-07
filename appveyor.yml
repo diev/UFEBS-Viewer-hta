@@ -51,3 +51,8 @@ deploy:
     secure: CePfctnBFd3iDwgVWlGOD6mfxQZrNBHK7IpsCK/deo2vHxA3lTr2nRnhbqpKqchQ
   artifact: AppZip
   force_update: true
+
+skip_commits:
+  files:
+    - docs\*
+    - '**\*.md'
