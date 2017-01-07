@@ -1,4 +1,4 @@
-# ![xml.png](docs/images/xml.png) [UFEBS Viewer](https://diev.github.io/UFEBS-Viewer-hta)
+# ![xml.png](docs/images/xml.png) [UFEBS Viewer](http://diev.github.io/UFEBS-Viewer-hta)
 
 [![Build status](https://ci.appveyor.com/api/projects/status/vvy9cv7hkgdcm13p?svg=true)](https://ci.appveyor.com/project/diev/ufebs-viewer-hta)
 
@@ -22,11 +22,13 @@
 * Возможна работа в автоматическом режиме. В командной строке, кроме имени 
 открываемого файла, можно использовать следующие ключи:
 
-  `/Print` | автоматически распечатать документ на принтере по-умолчанию
-  `/SaveText c:\folder` | сохранить документ в текстовый файл в каталог `c:\folder`
-  `/SaveXML c:\folder` | сохранить документ в XML файл в каталог `c:\folder`
-  `/Close` | закрыть окно программы через 10 сек
-  `/Help` или `/?` | вызов справки по ключам командной строки
+```
+/Print              - автоматически распечатать документ на принтере по-умолчанию
+/SaveText c:\folder - сохранить документ в текстовый файл в каталог c:\folder
+/SaveXML c:\folder  - сохранить документ в XML файл в каталог c:\folder
+/Close              - закрыть окно программы через 10 сек
+/Help или /?        - вызов справки по ключам командной строки
+```
 
 ## Замечания к использованию
 
@@ -37,18 +39,24 @@
 * До первого запуска программы внимательно изучите и отредактируйте 
 `UFEBS_Viewer.ini`.
 
-Смотрите также проект [SVK Transport](https://diev.github.io/SVK-Transport-hta) 
+Смотрите также проект [SVK Transport](http://diev.github.io/SVK-Transport-hta) 
 для обмена посылками с системой СВК Банка России.
+
+## Дополнительная информация на сайте Банка России
+
+* [Унифицированные форматы электронных банковских сообщений Банка России. 
+Обмен с клиентами Банка России](http://www.cbr.ru/analytics/Formats) 
+(УФЭБС, XML).
 
 ## История версий
 
-Программа импортирована на GitHub с версии 1.4.2 с ее страницы на 
+Проект импортирован на GitHub с версии 1.4.2 с его страницы на 
 [Bitbucket](https://bitbucket.org/html-applications/ufebs-viewer) 
 первоначального автора **mozers**.
 
 ## Лицензионное соглашение
 
-Приложение распространяется по лицензии [Apache 2.0](LICENSE).  
+Licensed under the [Apache License, Version 2.0](LICENSE).  
 (Вы можете использовать его совершенно свободно без всяких ограничений.)
 
 Данные для обратной связи находятся в коде заголовка HTA приложения.

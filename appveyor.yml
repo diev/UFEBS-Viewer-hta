@@ -34,9 +34,11 @@ build_script:
 
     echo *.xslt >>Package
 
-    echo README.md >>Package
+    echo %APPVEYOR_PROJECT_NAME% v%APPVEYOR_BUILD_VERSION% (%BUILDDATE%) >readme.txt
 
-    7z a UFEBS-Viewer-v%VERSION%.zip @Package
+    echo http://%APPVEYOR_ACCOUNT_NAME%.github.io/%APPVEYOR_PROJECT_NAME% >>readme.txt
+
+    7z a UFEBS-Viewer-v%VERSION%.zip @Package readme.txt
 artifacts:
 - path: UFEBS-Viewer-v$(version).zip
   name: AppZip
@@ -44,7 +46,7 @@ deploy:
 - provider: GitHub
   tag: v$(version)
   release: UFEBS Viewer v$(version)
-  description: '* $(appveyor_repo_commit_message)\n\nThis is an automatic build #$(appveyor_build_number) by AppVeyor $(BuildDate)\nSee more on https://$(appveyor_account_name).github.io/$(appveyor_project_name)/'
+  description: '* $(appveyor_repo_commit_message)\n\nBuild #$(appveyor_build_number) by AppVeyor $(BuildDate)\nSee docs on http://$(appveyor_account_name).github.io/$(appveyor_project_name)'
   auth_token:
     secure: CePfctnBFd3iDwgVWlGOD6mfxQZrNBHK7IpsCK/deo2vHxA3lTr2nRnhbqpKqchQ
   artifact: AppZip
