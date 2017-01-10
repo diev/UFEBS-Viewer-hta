@@ -1,6 +1,7 @@
 # ![xml.png](images/xml.png) UFEBS Viewer
 
 [![Build status](https://ci.appveyor.com/api/projects/status/vvy9cv7hkgdcm13p?svg=true)](https://ci.appveyor.com/project/diev/ufebs-viewer-hta)
+[![GitHub Release](https://img.shields.io/github/release/diev/UFEBS-Viewer-hta.svg)](https://github.com/diev/UFEBS-Viewer-hta/releases/latest)
 
 Просмотр файлов формата УФЭБС.
 
